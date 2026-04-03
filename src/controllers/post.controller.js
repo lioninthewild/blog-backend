@@ -49,4 +49,40 @@ const getAllPosts = async (req, res) => {
   }
 };
 
-module.exports = { createPost, getAllPosts };
+const updatePost = async (req, res) => {
+  const { id } = req.params;
+  const { title, content } = req.body;
+  const userId = req.user.userId;
+
+  if (!title || !content) {
+    return res.status(400).json({ message: "Title and content are required" });
+  }
+
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id },
+    });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (post.author_id !== userId) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const updated = await prisma.post.update({
+      where: { id },
+      data: { title, content },
+    });
+
+    res.status(200).json({
+      message: "Post updated successfully",
+      post: updated,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = { createPost, getAllPosts, updatePost };
