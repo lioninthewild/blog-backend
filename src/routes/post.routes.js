@@ -6,9 +6,10 @@ const {
   updatePost,
 } = require("../controllers/post.controller");
 const { authenticate } = require("../middleware/auth.middleware");
+const { checkOwnership } = require("../middleware/ownership.middleware");
 
 router.get("/", authenticate, getAllPosts);
 router.post("/", authenticate, createPost);
-router.put("/:id", authenticate, updatePost);
+router.put("/:id", authenticate, checkOwnership, updatePost);
 
 module.exports = router;
