@@ -5,7 +5,7 @@ const { jwtSecret } = require("../config/config");
 
 const register = async (req, res) => {
   const { email, password } = req.body;
-
+  console.log(req.body);
   try {
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -16,13 +16,15 @@ const register = async (req, res) => {
     }
 
     const password_hash = await bcrypt.hash(password, 10);
+    console.log(password_hash);
 
     const user = await prisma.user.create({
       data: {
-        email,
-        password_hash,
+        email: email,
+        password: password_hash,
       },
     });
+    console.log(user);
 
     res.status(201).json({
       message: "User registered successfully",
@@ -37,7 +39,7 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const existingUser = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email },
     });
 
@@ -57,7 +59,7 @@ const login = async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
-      userId: user.id,
+      token,
     });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
