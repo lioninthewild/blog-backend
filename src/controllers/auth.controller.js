@@ -1,4 +1,5 @@
 const prisma = require("../models/user");
+const bcrypt = require("bcrypt");
 
 const register = async (req, res) => {
   const { email, password } = req.body;
@@ -12,10 +13,12 @@ const register = async (req, res) => {
       return res.status(400).json({ message: "Email already in use" });
     }
 
+    const password_hash = await bcrypt.hash(password, 10);
+
     const user = await prisma.user.create({
       data: {
         email,
-        password_hash: password, // ⚠️ temporary — will be hashed in next step
+        password_hash,
       },
     });
 
