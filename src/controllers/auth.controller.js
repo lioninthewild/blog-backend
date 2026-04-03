@@ -1,5 +1,7 @@
 const prisma = require("../models/user");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { jwtSecret } = require("../config/config");
 
 const register = async (req, res) => {
   const { email, password } = req.body;
@@ -48,6 +50,10 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
+
+    const token = jwt.sign({ userId: user.id, role: user.role }, jwtSecret, {
+      expiresIn: "7d",
+    });
 
     res.status(200).json({
       message: "Login successful",
