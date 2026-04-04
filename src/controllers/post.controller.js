@@ -27,8 +27,16 @@ const createPost = async (req, res) => {
 };
 
 const getAllPosts = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  const skip = (page - 1) * limit;
+
   try {
+    const total = await prisma.post.count();
+
     const posts = await prisma.post.findMany({
+      skip,
+      take: limit,
       include: {
         author: {
           select: {
@@ -37,13 +45,34 @@ const getAllPosts = async (req, res) => {
             role: true,
           },
         },
+        comments: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: {
+            created_at: "desc",
+          },
+        },
       },
       orderBy: {
         created_at: "desc",
       },
     });
 
-    res.status(200).json({ posts });
+    res.status(200).json({
+      posts,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
