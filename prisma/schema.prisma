@@ -19,21 +19,10 @@ enum Role {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
+  id        String      @id @default(uuid())
   email     String   @unique
-  password  String
+  password_hash  String
   role      Role     @default(USER)
-  posts     Post[]
   createdAt DateTime @default(now())
-}
-
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updated_at DateTime @updatedAt
 }
